@@ -25,7 +25,7 @@
 #include "mediatek/oppo6893/21609/common/21609_common.dtsi"
 #include "mediatek/oppo6893/21609/pcbv1/21609_cust.dtsi"
 
-#include <oppo6893_21609/cust.dtsi>
+#include "oppo6893/21609_cust.dtsi"
 
 /* #ifdef OPLUS_ARCH_EXTENDS */
 #include "mediatek/oppo6893/common/oplus6893_20615_audio_extend.dtsi"

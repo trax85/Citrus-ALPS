@@ -1,57 +1,57 @@
 #!/bin/bash
 
-function compile() 
-{
-source ~/.bashrc && source ~/.profile
+yellow='\033[0;33m'
+white='\033[0m'
+red='\033[0;31m'
+gre='\e[0;32m'
+KERNEL_DIR=$PWD
+
+echo -e ""
+echo -e "$gre ====================================\n\n Welcome to Citrus building program !\n\n ===================================="
+echo -e "$gre \n 1.Build Citrus Clean\n\n 2.Build Citrus Dirty\n"
+echo -n " Enter your choice:"
+read qc
+
+Start=$(date +"%s")
+
+if [ $qc == 1 ]; then
+echo -e "$yellow Running make clean before compiling \n$white"
+make clean > /dev/null
+rmdir out
 export LC_ALL=C && export USE_CCACHE=1
 ccache -M 100G
 export ARCH=arm64
-export KBUILD_BUILD_HOST=origin
-export KBUILD_BUILD_USER="nishant6342"
-clangbin=clang/bin/clang
-if ! [ -a $clangbin ]; then git clone --depth=1 https://github.com/nishant6342/android_prebuilts_clang_host_linux-x86_clang-6443078 clang
-fi
-gcc64bin=los-4.9-64/bin/aarch64-linux-android-as
-if ! [ -a $gcc64bin ]; then git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_aarch64_aarch64-linux-android-4.9 los-4.9-64
-fi
-gcc32bin=los-4.9-32/bin/arm-linux-androideabi-as
-if ! [ -a $gcc32bin ]; then git clone --depth=1 https://github.com/LineageOS/android_prebuilts_gcc_linux-x86_arm_arm-linux-androideabi-4.9 los-4.9-32
-fi
+export KBUILD_BUILD_USER="trax85"
 
 [ -d "out" ] && rm -rf out || mkdir -p out
+fi
 
+echo -e "$white"
+date=$(date +"%d-%m-%y")
 make O=out ARCH=arm64 cupida_defconfig
-
-PATH="${PWD}/clang/bin:${PATH}:${PWD}/los-4.9-32/bin:${PATH}:${PWD}/los-4.9-64/bin:${PATH}" \
+echo -e "$gre Starting build now... \n$white"
+export PATH="${PATH}:/home/nesara/proton-clang/bin/"
 make -j$(nproc --all) O=out \
                       ARCH=arm64 \
                       CC="clang" \
                       CLANG_TRIPLE=aarch64-linux-gnu- \
-                      CROSS_COMPILE="${PWD}/los-4.9-64/bin/aarch64-linux-android-" \
-                      CROSS_COMPILE_ARM32="${PWD}/los-4.9-32/bin/arm-linux-androideabi-" \
+                      CROSS_COMPILE=aarch64-linux-gnu- \
+                      CROSS_COMPILE_ARM32=arm-linux-gnueabi- \
+                      OBJDUMP=llvm-objdump STRIP=llvm-strip \
+                      AR=llvm-ar NM=llvm-nm OBJCOPY=llvm-objcopy \
                       CONFIG_NO_ERROR_ON_MISMATCH=y
-}
 
-function zupload()
-{
-zimage=out/arch/arm64/boot/Image.gz-dtb
+zimage=$KERNEL_DIR/out/arch/arm64/boot/Image
 if ! [ -a $zimage ];
 then
-echo  " Failed to compile zImage, fix the errors first "
+echo -e "$red << Failed to compile zImage, fix the errors first >>$white"
 else
-echo -e " Build succesful, generating flashable zip now "
-anykernelbin=AnyKernel/anykernel.sh
-if ! [ -a $anykernelbin ]; then git clone --depth=1 https://github.com/nishant6342/AnyKernel3 -b cupida  AnyKernel
-fi
+End=$(date +"%s")
+Diff=$(($End - $Start))
+echo -e "$yellow\n Build succesful, generating flashable zip now \n $white"
 cp out/arch/arm64/boot/Image.gz-dtb AnyKernel
 cd AnyKernel
-zip -r9 ORIGIN-OSS-KERNEL-RMX3031.zip *
-#curl --upload-file ORIGIN-OSS-KERNEL-RMX3031.zip https://transfer.sh/
-curl -sL https://git.io/file-transfer | sh
-./transfer wet ORIGIN-OSS-KERNEL-RMX3031.zip
-cd ../
+rm *.zip > /dev/null 2>&1
+zip -r9 Citrus-Cupida-Test.zip *
+echo -e "$gre << Build completed in $(($Diff / 60)) minutes and $(($Diff % 60)) seconds >> \n $white"
 fi
-}
-
-compile
-zupload

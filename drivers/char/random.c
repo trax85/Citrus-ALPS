@@ -83,6 +83,9 @@ static enum {
 /* Various types of waiters for crng_init->CRNG_READY transition. */
 static DECLARE_WAIT_QUEUE_HEAD(crng_init_wait);
 static struct fasync_struct *fasync;
+
+static DEFINE_SPINLOCK(random_ready_list_lock);
+static LIST_HEAD(random_ready_list);
 static DEFINE_SPINLOCK(random_ready_chain_lock);
 static RAW_NOTIFIER_HEAD(random_ready_chain);
 
@@ -135,6 +138,45 @@ int wait_for_random_bytes(void)
 	return 0;
 }
 EXPORT_SYMBOL(wait_for_random_bytes);
+
+/*
+ * Add a callback function that will be invoked when the nonblocking
+ * pool is initialised.
+ *
+ * returns: 0 if callback is successfully added
+ *	    -EALREADY if pool is already initialised (callback not called)
+ *	    -ENOENT if module for callback is not alive
+ */
+int add_random_ready_callback(struct random_ready_callback *rdy)
+{
+	struct module *owner;
+	unsigned long flags;
+	int err = -EALREADY;
+
+	if (crng_ready())
+		return err;
+
+	owner = rdy->owner;
+	if (!try_module_get(owner))
+		return -ENOENT;
+
+	spin_lock_irqsave(&random_ready_list_lock, flags);
+	if (crng_ready())
+		goto out;
+
+	owner = NULL;
+
+	list_add(&rdy->list, &random_ready_list);
+	err = 0;
+
+out:
+	spin_unlock_irqrestore(&random_ready_list_lock, flags);
+
+	module_put(owner);
+
+	return err;
+}
+EXPORT_SYMBOL(add_random_ready_callback);
 
 /*
  * Add a callback function that will be invoked when the input

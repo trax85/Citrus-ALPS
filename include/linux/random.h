@@ -10,6 +10,12 @@
 
 #include <uapi/linux/random.h>
 
+struct random_ready_callback {
+	struct list_head list;
+	void (*func)(struct random_ready_callback *rdy);
+	struct module *owner;
+};
+
 struct notifier_block;
 
 void add_device_randomness(const void *buf, size_t len);
@@ -67,6 +73,7 @@ static inline unsigned long get_random_canary(void)
 int __init random_init(const char *command_line);
 bool rng_is_initialized(void);
 int wait_for_random_bytes(void);
+extern int add_random_ready_callback(struct random_ready_callback *rdy);
 int register_random_ready_notifier(struct notifier_block *nb);
 int unregister_random_ready_notifier(struct notifier_block *nb);
 

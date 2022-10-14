@@ -721,18 +721,18 @@ int oplus_vooc_get_smaller_battemp_cooldown(int ret_batt, int ret_cool){
 		&& ret_cool > 0 && ret_cool < (array_len + 1)) {
 		ret_batt_current =  current_level[ret_batt -1];
 		ret_cool_current = current_level[ret_cool -1];
-		oplus_chg_debug_get_cooldown_current(ret_batt_current, ret_cool_current);
+		//oplus_chg_debug_get_cooldown_current(ret_batt_current, ret_cool_current);
 		ret_cool_current = ret_cool_current < ret_batt_current ? ret_cool_current : ret_batt_current;
 
-		if(ret_cool > 0) {
-			if(ret_cool_current < ret_batt_current) {
+		//if(ret_cool > 0) {
+		//	if(ret_cool_current < ret_batt_current) {
 				/*set flag cool down by user */
-				oplus_chg_debug_set_cool_down_by_user(1);
-			} else {
+		//		oplus_chg_debug_set_cool_down_by_user(1);
+		//	} else {
 				/*clear flag cool down by user */
-				oplus_chg_debug_set_cool_down_by_user(0);
-			}
-		}
+		//		oplus_chg_debug_set_cool_down_by_user(0);
+		//	}
+		//}
 
 		for(i = 0 ; i < array_len; i++) {
 			if (current_level[i] == ret_cool_current) {

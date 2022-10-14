@@ -2398,7 +2398,7 @@ int oplus_chg_init(struct oplus_chg_chip *chip)
 	}
 #endif
 
-	oplus_chg_debug_info_init();
+	//oplus_chg_debug_info_init();
 	init_proc_chg_log();
 	init_proc_chg_cycle();
 	init_proc_critical_log();
@@ -7498,7 +7498,7 @@ static void oplus_chg_other_thing(struct oplus_chg_chip *chip)
 			}
 		}
 	}
-	oplus_chg_debug_chg_monitor(chip);
+	//oplus_chg_debug_chg_monitor(chip);
 	oplus_chg_print_log(chip);
 	oplus_chg_critical_log(chip);
 #ifndef CONFIG_OPLUS_CHARGER_MTK

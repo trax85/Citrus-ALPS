@@ -28,4 +28,4 @@ obj-y	+= oplus_vooc.o
 obj-y	+= oplus_adapter.o
 obj-y	+= oplus_wireless.o
 obj-y	+= oplus_short.o
-obj-y   += oplus_debug_info.o
+#obj-y   += oplus_debug_info.o
